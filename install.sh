@@ -116,8 +116,8 @@ fi
 echo
 echo "${Default}--------------------------------------------------------------------------"
 echo "Ok, let's configure GeoMapFish before we can install it:"
-read -p "What version do you want to install? [2.5] " -r gmfver
-gmfver=${gmfver:-2.5}
+read -p "What version do you want to install? [2.6] " -r gmfver
+gmfver=${gmfver:-2.6}
 read -p "What is the fantastic name of your project? [my-super-gmf-app] " -r projname
 projname=${projname:-my-super-gmf-app}
 read -p "What coordinate system do you want to use? [2056] " -r srid
@@ -338,14 +338,22 @@ then
   echo "${Blue}There's a problem with proxies... This has to be clarified with C2C"
   echo "${Blue}For the moment, we'll try to fix the problem with a custom solution"
   containerprefix=`echo 'my-super-gmf-app' | sed -r 's/-/_/g'`
+  if [ "$gmfver" = "2.5" ]
+  then
+    c2cwsgiutilspath="/opt/c2cwsgiutils/"
+  elif [ "$gmfver" = "2.6" ]
+  then
+    c2cwsgiutilspath="/usr/local/lib/python3.8/dist-packages/"
+  fi
+
   mkdir __fix
-  docker cp ${containerprefix}_geoportal_1:/opt/c2cwsgiutils/c2cwsgiutils/pyramid_logging.py __fix/pyramid_logging.py
   docker cp ${containerprefix}_geoportal_1:/opt/alembic/env.py __fix/env.py
   docker cp ${containerprefix}_tilegeneration_slave_1:/app/tilecloud_chain/__init__.py __fix/__init__.py
+  docker cp ${containerprefix}_geoportal_1:${c2cwsgiutilspath}/c2cwsgiutils/pyramid_logging.py __fix/pyramid_logging.py
   fix_proxy "__fix/pyramid_logging.py"
   fix_proxy "__fix/env.py" "top"
   fix_proxy "__fix/__init__.py"
-  wget --quiet "https://raw.githubusercontent.com/geomapfish/getting_started/main/docker-compose.yaml" -O docker-compose.yaml
+  wget --quiet "https://raw.githubusercontent.com/geomapfish/getting_started/2.6/fix/${gmfver}/docker-compose.yaml" -O docker-compose.yaml
   echo "${Green}OK."
 
   echo "${Default}Restarting GeoMapFish..."
