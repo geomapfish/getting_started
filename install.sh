@@ -353,7 +353,7 @@ then
   fix_proxy "__fix/pyramid_logging.py"
   fix_proxy "__fix/env.py" "top"
   fix_proxy "__fix/__init__.py"
-  wget --quiet "https://raw.githubusercontent.com/geomapfish/getting_started/2.6/fix/${gmfver}/docker-compose.yaml" -O docker-compose.yaml
+  wget --quiet "https://raw.githubusercontent.com/geomapfish/getting_started/main/fix/${gmfver}/docker-compose.yaml" -O docker-compose.yaml
   echo "${Green}OK."
 
   echo "${Default}Restarting GeoMapFish..."
