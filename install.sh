@@ -331,21 +331,13 @@ def _fix_case(env):
   sed -i "s/dict(os.environ)/_fix_case(dict(os.environ))/g" $1
 }
 
-if [ "$using_proxy" = true ]
+if [ "$using_proxy" = true ] && [ "$gmfver" = "2.5" ]
 then
   echo
   echo "${Default}---------------------------------------------------------------------------"
-  echo "${Blue}There's a problem with proxies... This has to be clarified with C2C"
-  echo "${Blue}For the moment, we'll try to fix the problem with a custom solution"
+  echo "${Blue}There's a problem with proxies... This has been corrected in 2.6."
   containerprefix=`echo 'my-super-gmf-app' | sed -r 's/-/_/g'`
-  if [ "$gmfver" = "2.5" ]
-  then
-    c2cwsgiutilspath="/opt/c2cwsgiutils/"
-  elif [ "$gmfver" = "2.6" ]
-  then
-    c2cwsgiutilspath="/usr/local/lib/python3.8/dist-packages/"
-  fi
-
+  c2cwsgiutilspath="/opt/c2cwsgiutils/"
   mkdir __fix
   docker cp ${containerprefix}_geoportal_1:/opt/alembic/env.py __fix/env.py
   docker cp ${containerprefix}_tilegeneration_slave_1:/app/tilecloud_chain/__init__.py __fix/__init__.py
