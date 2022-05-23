@@ -165,13 +165,25 @@ echo
 echo "${Default}---------------------------------------------------------------------------"
 
 # Create project
+
+echo ${gmfver:0:3}
+
+if [[ ${gmfver:0:3} > "2.6" ]]
+then
+    create=create
+    update=update
+else
+    create=c2cgeoportal_create
+    update=c2cgeoportal_update
+fi
+
 echo "${Default}Creating GeoMapFish project..."
-docker run --rm -ti --volume=$(pwd):/src --env=SRID=$srid --env=EXTENT="$extent" camptocamp/geomapfish-tools:$gmfver run $(id -u) $(id -g) /src pcreate -s c2cgeoportal_create $projname > install.log
+docker run --rm -ti --volume=$(pwd):/src --env=SRID=$srid --env=EXTENT="$extent" camptocamp/geomapfish-tools:$gmfver run $(id -u) $(id -g) /src pcreate -s $create $projname > install.log
 echo "${Green}OK."
 
 # Update project
 echo "${Default}Updating project..."
-docker run --rm -ti --volume=$(pwd):/src --env=SRID=$srid --env=EXTENT="$extent" camptocamp/geomapfish-tools:$gmfver run $(id -u) $(id -g) /src pcreate -s c2cgeoportal_update $projname >> install.log
+docker run --rm -ti --volume=$(pwd):/src --env=SRID=$srid --env=EXTENT="$extent" camptocamp/geomapfish-tools:$gmfver run $(id -u) $(id -g) /src pcreate -s $update $projname >> install.log
 echo "${Green}OK."
 
 # Correct error in .eslintrc file
