@@ -116,8 +116,8 @@ fi
 echo
 echo "${Default}--------------------------------------------------------------------------"
 echo "Ok, let's configure GeoMapFish before we can install it:"
-read -p "What version do you want to install? [2.6] " -r gmfver
-gmfver=${gmfver:-2.6}
+read -p "What version do you want to install? [2.7] " -r gmfver
+gmfver=${gmfver:-2.7}
 read -p "What is the fantastic name of your project? [my-super-gmf-app] " -r projname
 projname=${projname:-my-super-gmf-app}
 read -p "What coordinate system do you want to use? [2056] " -r srid
@@ -183,7 +183,7 @@ echo "${Green}OK."
 
 # Update project
 echo "${Default}Updating project..."
-docker run --rm -ti --volume=$(pwd):/src --env=SRID=$srid --env=EXTENT="$extent" camptocamp/geomapfish-tools:$gmfver run $(id -u) $(id -g) /src pcreate -s $update $projname >> install.log
+docker run --rm -ti --volume=$(pwd):/src --env=SRID=$srid --env=EXTENT="$extent" camptocamp/geomapfish-tools:$gmfver run $(id -u) $(id -g) /src pcreate -s $update $projname --overwrite >> install.log
 echo "${Green}OK."
 
 # Correct error in .eslintrc file
@@ -206,13 +206,8 @@ echo
 if [[ $cont =~ ^[Yy]$ ]]
 then
   echo "Configuring GeoMapFish Database..."
-  
-  dbhost=172.17.0.1
-  # Check if the default network was overriden on this server
-  if [ -f /etc/docker/daemon.json ]
-  then
-    dbhost=`sed -r 's/.*"bip" *\: *"([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+).*/\1/' /etc/docker/daemon.json`
-  fi
+
+  dbhost=localhost
 
   dbport=5432
   dbname=mydb
