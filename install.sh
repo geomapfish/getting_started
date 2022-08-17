@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -ax
 
 Default=$'\e[0m'
 Green=$'\e[1;32m'
