@@ -1,4 +1,4 @@
-#!/bin/bash -ax
+#!/bin/bash -a
 
 Default=$'\e[0m'
 Green=$'\e[1;32m'
@@ -195,40 +195,22 @@ echo "${Green}PERFECT!"
 # Database configuration
 ########################
 
+dbhost="db"
+dbport=5432
+dbname="mydb"
+dbuser="www"
+dbpass="secret"
+
 echo
 echo "${Default}---------------------------------------------------------------------------"
 echo "The first step is done. Now, we'll have to configure the database."
 echo "If you want, a test database can be installed locally automatically."
 echo "But if you already have configured one, it can be used."
 
-read -p "Do you want to download and configure a database automatically? [y/n] " -n 1 -r cont
+read -p "Do you want to configure a database automatically? [y/n] " -n 1 -r autoDb
 echo
-if [[ $cont =~ ^[Yy]$ ]]
+if [[ $autoDb =~ ^[Nn]$ ]]
 then
-  echo "Configuring GeoMapFish Database..."
-
-  dbhost=localhost
-
-  dbport=5432
-  dbname=mydb
-  dbuser=www
-  dbpass=secret
-  
-  docker pull postgis/postgis:11-3.1
-  docker kill gmf_postgis >> ../install.log 2>&1
-  docker run --rm --name gmf_postgis -p 5432:5432 -v postgres:/var/lib/postgresql/data -e POSTGRES_PASSWORD=secret -d postgis/postgis:11-3.1 >> ../install.log
-  # Wait the postgres startup
-  sleep 20
-  docker exec gmf_postgis bash -c "psql -U postgres -c 'CREATE DATABASE mydb;'" >> ../install.log
-  docker exec gmf_postgis bash -c "psql -U postgres -d mydb -c 'CREATE EXTENSION postgis;'" >> ../install.log
-  docker exec gmf_postgis bash -c "psql -U postgres -d mydb -c 'CREATE EXTENSION hstore;'" >> ../install.log
-  docker exec gmf_postgis bash -c "psql -U postgres -d mydb -c \"CREATE USER www PASSWORD 'secret';\"" >> ../install.log
-  docker exec gmf_postgis bash -c "psql -U postgres -d mydb -c 'CREATE SCHEMA main;'" >> ../install.log
-  docker exec gmf_postgis bash -c "psql -U postgres -d mydb -c 'CREATE SCHEMA main_static;'" >> ../install.log
-  docker exec gmf_postgis bash -c "psql -U postgres -d mydb -c 'GRANT ALL ON SCHEMA main TO www;'" >> ../install.log
-  docker exec gmf_postgis bash -c "psql -U postgres -d mydb -c 'GRANT ALL ON SCHEMA main_static TO www;'" >> ../install.log
-  echo "${Green}OK." 
-else
   echo "${Default}Ok, let's configure your database connection then.."
   while [ -z $dbhost ]
   do
@@ -285,7 +267,7 @@ sed -i "s/VISIBLE_WEB_HOST=localhost/VISIBLE_WEB_HOST=${gmf_host}/g" env.default
 sed -i "s/8484/${gmf_port}/g" env.default
 echo "${Green}OK."
 
-# Initialize git and firt commit
+# Initialize git and first commit
 echo "${Default}Committing first version..."
 git init . >> ../install.log
 git add . >> ../install.log
@@ -299,6 +281,26 @@ echo "${Green}OK."
 echo "${Default}Compiling GeoMapFish project..."
 ./build >> ../install.log
 echo "${Green}OK."
+
+# Prepare the auto database
+if [[ $autoDb =~ ^[Yy]$ ]]
+then
+  echo "Configuring GeoMapFish Database..."
+
+  # Uncomment db service in docker-compose.yaml file
+  start=$(grep -nE ' {2}# db:' docker-compose.yaml | cut -d : -f 1)
+  end=$(grep -nE ' {2}# {5}- postgresql_data' docker-compose.yaml | cut -d : -f 1)
+  sed -i "$start,$end s/ #//g" docker-compose.yaml
+
+  docker-compose up -d db
+  # Wait the postgres startup
+  sleep 20
+  docker-compose exec db psql -d $dbname -c 'CREATE EXTENSION postgis;' >> ../install.log
+  docker-compose exec db psql -d $dbname -c 'CREATE EXTENSION hstore;' >> ../install.log
+  docker-compose exec db psql -d $dbname -c 'CREATE SCHEMA main;' >> ../install.log
+  docker-compose exec db psql -d $dbname -c 'CREATE SCHEMA main_static;' >> ../install.log
+  echo "${Green}OK." 
+fi
 
 # Start the app
 ###############
