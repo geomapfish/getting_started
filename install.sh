@@ -24,9 +24,21 @@ check()
   if command -v $1 > /dev/null
   then
     version=`$1 --version | head -1 2>&1`
-    echo "${Green}[OK]  $version"
+    echo "${Green}[OK] $version"
   else
     echo "${Red}[NOK] $1 NOT FOUND"
+    echo "Please install the missing requirement."
+    abort 91
+  fi
+}
+
+checkpythonmodule()
+{
+  if python3 -c "import pkgutil; exit(not pkgutil.find_loader('$1'))"
+  then
+    echo "${Green}[OK] $1"
+  else
+    echo "${Red}[NOK] $1 python module NOT FOUND"
     echo "Please install the missing requirement."
     abort 91
   fi
@@ -37,7 +49,7 @@ checkuser()
   user=`whoami`
   if getent group docker | grep -q $user
   then
-    echo "${Green}[OK]  User $user is in group docker"
+    echo "${Green}[OK] User $user is in group docker"
   else
     echo "${Red}[NOK] User $user is not in group docker"
     abort 92
@@ -52,7 +64,7 @@ checkport()
     if [ $used == 0 ]
     then
       gmf_port=$i
-      echo "${Green}[OK]  Port $gmf_port will be used by GeoMapFish"
+      echo "${Green}[OK] Port $gmf_port will be used by GeoMapFish"
       return
     fi
   done
@@ -67,6 +79,7 @@ check 'git'
 check 'docker'
 check 'docker-compose'
 check 'python3'
+checkpythonmodule 'yaml'
 check 'ss'
 check 'sed'
 check 'wget'
