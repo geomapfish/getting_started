@@ -278,8 +278,13 @@ sed -i "s/PGPASSWORD=<pass>/PGPASSWORD=${dbpass}/g" env.project
 sed -i "s/PGSSLMODE=require/PGSSLMODE=prefer/g" env.project
 sed -i "s/VISIBLE_WEB_HOST=localhost/VISIBLE_WEB_HOST=${gmf_host}/g" env.default
 sed -i "s/8484/${gmf_port}/g" env.default
-start=$(expr $(grep -nE ' {6}service: config' docker-compose.yaml | cut -d : -f 1) + 1)
-sed -i "$start i \    pull_policy: never" docker-compose.yaml
+
+# Do not try to build config on docker-compose v2
+if docker-compose -v | grep -o "v2" > /dev/null
+then
+  start=$(expr $(grep -nE ' {6}service: config' docker-compose.yaml | cut -d : -f 1) + 1)
+  sed -i "$start i \    pull_policy: never" docker-compose.yaml
+fi
 echo "${Green}OK."
 
 # Initialize git and first commit
