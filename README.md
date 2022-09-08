@@ -43,7 +43,7 @@ The first step is to install the GeoMapFish requirements.
 You will need to have the following components installed on your system:
 
 - Git
-- Python >= 3.5
+- Python >= 3.7 with pyyaml
 - Docker >= 17.05
 - Docker-Compose
 
