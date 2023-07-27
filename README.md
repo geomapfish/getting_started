@@ -9,8 +9,8 @@ chmod +x install.sh
 
 Then, follow the instructions.  
 
-Your application is at https://localhost:8484.  
-The admin interface is at https://localhost:8484/admin.  
+Your application is at https://<replace_with_your_computer_name>:8484.  
+The admin interface is at https://<replace_with_your_computer_name>:8484/admin.  
 The default credentials are admin/admin.
 
 That's it!  
@@ -128,7 +128,7 @@ ___
 You should now have a working instance of GeoMapFish.  
 Congratulations!
 
-Now, it's time to start your application for the first time. You should be able to do this at [https://hostname:port]() (for exemple https://localhost:8484).
+Now, it's time to start your application for the first time. You should be able to do this at [https://hostname:port]() (for exemple https://<replace_with_your_computer_name>:8484).
 
 Because your new instance of GeoMapFish doesn't have any valid SSL certificat yet, you will very likely get a `NET::ERR_CERT_AUTHORITY_INVALID` warning from your Browser:
 
@@ -169,7 +169,7 @@ If you want a nice mapping application, I guess you need a background map to get
 Let's add a WMTS Layer from Swisstopo in order to use it as Basemap.
 
 ### 1. Connect to the admin interface
-It is available at [https://hostname:port/admin]() (for exemple https://localhost:8484/admin).  
+It is available at [https://<replace_with_your_computer_name>:port/admin]() (for exemple https://<replace_with_your_computer_name>:8484/admin).  
 As you are already logged in to GeoMapFish with the **admin** user, you are also automatically authenticated to the administration interface.
 
 ### 2. Add a new WMTS Layer
@@ -208,7 +208,7 @@ Click `Submit`.
 
 ### 4. Refresh the application
 
-Go back to your geoportal (https://localhost:8484), and refresh the website with `F5`. The new basemap should now be available in the background selector:
+Go back to your geoportal (https://<replace_with_your_computer_name>:8484), and refresh the website with `F5`. The new basemap should now be available in the background selector:
 
 ![With Basemap](img/with_basemap.png)
 
