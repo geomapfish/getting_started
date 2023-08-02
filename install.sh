@@ -73,6 +73,13 @@ checkport()
   abort 93
 }
 
+checkdocker() {
+  if ! docker info &>/dev/null; then
+    echo "${Red}[NOK] Error: Docker daemon is not running or not accessible."
+    exit 1
+  fi
+}
+
 echo
 echo "${Default}---------------------------------------------------------------------------"
 echo "${Default}Analysing requirements..."
@@ -86,6 +93,7 @@ check 'sed'
 check 'wget'
 checkuser
 checkport
+checkdocker
 
 # Proxy configuration
 #####################
