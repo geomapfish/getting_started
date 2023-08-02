@@ -334,6 +334,8 @@ fi
 # Start the app
 ###############
 echo "${Default}Starting GeoMapFish..."
+# Bug on WSL requires a cd on PWD: https://github.com/docker/compose/issues/7899
+cd $(pwd)
 docker-compose up -d
 echo "${Green}OK."
 
