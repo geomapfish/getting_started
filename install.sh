@@ -7,7 +7,8 @@ Red=$'\e[1;31m'
 
 declare -i gmf_port
 gmf_port=8484
-gmf_host=`hostname`
+# to lowercase because WSL takes windows name that can contain upper case
+gmf_host=$(hostname | tr '[:upper:]' '[:lower:]')
 using_proxy=false
 
 abort()
@@ -72,6 +73,13 @@ checkport()
   abort 93
 }
 
+checkdocker() {
+  if ! docker info &>/dev/null; then
+    echo "${Red}[NOK] Error: Docker daemon is not running or not accessible."
+    exit 1
+  fi
+}
+
 echo
 echo "${Default}---------------------------------------------------------------------------"
 echo "${Default}Analysing requirements..."
@@ -85,6 +93,7 @@ check 'sed'
 check 'wget'
 checkuser
 checkport
+checkdocker
 
 # Proxy configuration
 #####################
@@ -129,8 +138,8 @@ fi
 echo
 echo "${Default}--------------------------------------------------------------------------"
 echo "Ok, let's configure GeoMapFish before we can install it:"
-read -p "What version do you want to install? [2.7] " -r gmfver
-gmfver=${gmfver:-2.7}
+read -p "What version do you want to install? [2.8] " -r gmfver
+gmfver=${gmfver:-2.8}
 read -p "What is the fantastic name of your project? [my-super-gmf-app] " -r projname
 projname=${projname:-my-super-gmf-app}
 read -p "What coordinate system do you want to use? [2056] " -r srid
@@ -325,6 +334,8 @@ fi
 # Start the app
 ###############
 echo "${Default}Starting GeoMapFish..."
+# Bug on WSL requires a cd on PWD: https://github.com/docker/compose/issues/7899
+cd $(pwd)
 docker-compose up -d
 echo "${Green}OK."
 
