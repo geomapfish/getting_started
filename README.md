@@ -9,9 +9,9 @@ chmod +x install.sh
 
 Then, follow the instructions.
 
-Your application is at `https://<your_computer_name>:8484`. Replace `<your_computer_name>`  with your actual computer name in lower case. On the first connection you will be kindly asked to add an exception to security risks by the browser (because of the auto-signed certificate).
-The admin interface is at `https://<your_computer_name>:8484/admin`.
-The default credentials are admin/admin.
+- Your application is at `https://<your_computer_name>:8484`. Replace `<your_computer_name>` with your actual computer name in lower case. On the first connection you will be kindly asked to add an exception to security risks by the browser (because of the auto-signed certificate).
+- The admin interface is at `https://<your_computer_name>:8484/admin`.
+- The default credentials are admin/admin.
 
 That's it!
 Enjoy :-)
