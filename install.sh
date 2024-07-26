@@ -287,6 +287,8 @@ sed -i "s/PGPASSWORD=<pass>/PGPASSWORD=${dbpass}/g" env.project
 sed -i "s/PGSSLMODE=require/PGSSLMODE=prefer/g" env.project
 sed -i "s/VISIBLE_WEB_HOST=localhost/VISIBLE_WEB_HOST=${gmf_host}/g" env.default
 sed -i "s/8484/${gmf_port}/g" env.default
+# Line returns not supported
+sed -i ':a;N;$!ba;s/HAPROXY_LOGGING_OPTIONS="log global\n    option httplog\n    option dontlognull"/HAPROXY_LOGGING_OPTIONS=""/g' env.default
 
 # Do not try to build config on docker-compose v2
 if docker-compose -v | grep -o "v2" > /dev/null
@@ -324,10 +326,10 @@ then
   docker-compose up -d db
   # Wait the postgres startup
   sleep 20
-  docker-compose exec db psql -d $dbname -c 'CREATE EXTENSION postgis;' >> ../install.log
-  docker-compose exec db psql -d $dbname -c 'CREATE EXTENSION hstore;' >> ../install.log
-  docker-compose exec db psql -d $dbname -c 'CREATE SCHEMA main;' >> ../install.log
-  docker-compose exec db psql -d $dbname -c 'CREATE SCHEMA main_static;' >> ../install.log
+  docker-compose exec db psql -U $dbuser -d $dbname -c 'CREATE EXTENSION postgis;' >> ../install.log
+  docker-compose exec db psql -U $dbuser -d $dbname -c 'CREATE EXTENSION hstore;' >> ../install.log
+  docker-compose exec db psql -U $dbuser -d $dbname -c 'CREATE SCHEMA main;' >> ../install.log
+  docker-compose exec db psql -U $dbuser -d $dbname -c 'CREATE SCHEMA main_static;' >> ../install.log
   echo "${Green}OK." 
 fi
 
@@ -397,6 +399,12 @@ fi
 echo "${Default}Initializing Database..."
 docker-compose exec geoportal alembic --name=main upgrade head
 docker-compose exec geoportal alembic --name=static upgrade head
+echo "${Green}OK."
+
+# Fix disabled user bug
+################
+echo "${Default}Fixing user status in DB..."
+docker-compose exec tools psql -U $dbuser -d $dbname -c 'UPDATE main_static."user" SET deactivated = FALSE WHERE deactivated is NULL;' >> ../install.log
 echo "${Green}OK."
 
 echo
