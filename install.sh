@@ -78,6 +78,10 @@ checkdocker() {
     echo "${Red}[NOK] Error: Docker daemon is not running or not accessible."
     exit 1
   fi
+  if ! docker compose version &>/dev/null; then
+    echo "${Red}[NOK] Error: Docker compose is not available."
+    exit 1
+  fi
 }
 
 echo
@@ -85,7 +89,6 @@ echo "${Default}----------------------------------------------------------------
 echo "${Default}Analysing requirements..."
 check 'git'
 check 'docker'
-check 'docker-compose'
 check 'python3'
 checkpythonmodule 'yaml'
 check 'ss'
@@ -138,8 +141,8 @@ fi
 echo
 echo "${Default}--------------------------------------------------------------------------"
 echo "Ok, let's configure GeoMapFish before we can install it:"
-read -p "What version do you want to install? [2.8] " -r gmfver
-gmfver=${gmfver:-2.8}
+read -p "What version do you want to install? [2.9] " -r gmfver
+gmfver=${gmfver:-2.9}
 read -p "What is the fantastic name of your project? [my-super-gmf-app] " -r projname
 projname=${projname:-my-super-gmf-app}
 read -p "What coordinate system do you want to use? [2056] " -r srid
@@ -208,11 +211,7 @@ echo "${Default}Updating project..."
 docker run --rm -ti --volume=$(pwd):/src --env=SRID=$srid --env=EXTENT="$extent" camptocamp/geomapfish-tools:$gmfver run $(id -u) $(id -g) /src pcreate -s $update $projname --overwrite >> install.log
 echo "${Green}OK."
 
-# Correct error in .eslintrc file
-echo "${Default}Gathering positiveness..."
 cd $projname
-sed -i 's/code: 110/code: 200/g' geoportal/.eslintrc
-echo "${Green}PERFECT!"
 
 # Database configuration
 ########################
@@ -290,12 +289,6 @@ sed -i "s/8484/${gmf_port}/g" env.default
 # Line returns not supported
 sed -i ':a;N;$!ba;s/HAPROXY_LOGGING_OPTIONS="log global\n    option httplog\n    option dontlognull"/HAPROXY_LOGGING_OPTIONS=""/g' env.default
 
-# Do not try to build config on docker-compose v2
-if docker-compose -v | grep -o "v2" > /dev/null
-then
-  start=$(expr $(grep -nE ' {6}service: config' docker-compose.yaml | cut -d : -f 1) + 1)
-  sed -i "$start i \    pull_policy: never" docker-compose.yaml
-fi
 echo "${Green}OK."
 
 # Initialize git and first commit
@@ -323,13 +316,13 @@ then
   end=$(grep -nE ' {2}# {5}- postgresql_data' docker-compose.yaml | cut -d : -f 1)
   sed -i "$start,$end s/ #//g" docker-compose.yaml
 
-  docker-compose up -d db
+  docker compose up -d db
   # Wait the postgres startup
   sleep 20
-  docker-compose exec db psql -U $dbuser -d $dbname -c 'CREATE EXTENSION postgis;' >> ../install.log
-  docker-compose exec db psql -U $dbuser -d $dbname -c 'CREATE EXTENSION hstore;' >> ../install.log
-  docker-compose exec db psql -U $dbuser -d $dbname -c 'CREATE SCHEMA main;' >> ../install.log
-  docker-compose exec db psql -U $dbuser -d $dbname -c 'CREATE SCHEMA main_static;' >> ../install.log
+  docker compose exec db psql -U $dbuser -d $dbname -c 'CREATE EXTENSION postgis;' >> ../install.log
+  docker compose exec db psql -U $dbuser -d $dbname -c 'CREATE EXTENSION hstore;' >> ../install.log
+  docker compose exec db psql -U $dbuser -d $dbname -c 'CREATE SCHEMA main;' >> ../install.log
+  docker compose exec db psql -U $dbuser -d $dbname -c 'CREATE SCHEMA main_static;' >> ../install.log
   echo "${Green}OK." 
 fi
 
@@ -338,7 +331,7 @@ fi
 echo "${Default}Starting GeoMapFish..."
 # Bug on WSL requires a cd on PWD: https://github.com/docker/compose/issues/7899
 cd $(pwd)
-docker-compose up -d
+docker compose up -d
 echo "${Green}OK."
 
 # Fix proxy error
@@ -391,20 +384,20 @@ then
   echo "${Green}OK."
 
   echo "${Default}Restarting GeoMapFish..."
-  docker-compose down && docker-compose up -d
+  docker compose down && docker compose up -d
 fi
 
 # Create schemas
 ################
 echo "${Default}Initializing Database..."
-docker-compose exec geoportal alembic --name=main upgrade head
-docker-compose exec geoportal alembic --name=static upgrade head
+docker compose exec geoportal alembic --name=main upgrade head
+docker compose exec geoportal alembic --name=static upgrade head
 echo "${Green}OK."
 
 # Fix disabled user bug
 ################
 echo "${Default}Fixing user status in DB..."
-docker-compose exec tools psql -U $dbuser -d $dbname -c 'UPDATE main_static."user" SET deactivated = FALSE WHERE deactivated is NULL;' >> ../install.log
+docker compose exec tools psql -U $dbuser -d $dbname -c 'UPDATE main_static."user" SET deactivated = FALSE WHERE deactivated is NULL;' >> ../install.log
 echo "${Green}OK."
 
 echo
