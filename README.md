@@ -17,15 +17,24 @@ That's it!
 Enjoy :-)
 
 ___
+
 # Getting Started with GeoMapFish - **Long version**
 
 ## Introduction
 
 This page goes through the basic, required steps to create your first GeoMapFish application from scratch. It is based on **Version 2.8**. To learn what GeoMapFish is all about, please visit our [homepage](https://geomapfish.org/).
 
-This guide is written for Linux systems. GeoMpaFish works on Windows systems as well, but as the community is using Linux in a large majority, there is no guide for Windows at the moment.
+This guide is written for Linux systems. GeoMapFish works on Windows systems as well, but as the community is using Linux in a large majority, there is no guide for Windows at the moment.
 
 ___
+
+## Requirements
+
+* Git
+* Docker
+* Python
+* Pyyaml (pip install pyyaml)
+
 ## **Step 1: Configure proxies**
 
 If you are behind a corporate proxy, you will have to configure the proxies. This can be done like this:
